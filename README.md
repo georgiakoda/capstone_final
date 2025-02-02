@@ -38,5 +38,13 @@ If everything is good it should say:
 In your broswer go to: http://127.0.0.1:8000/
 and a JSON should show up with the message "test". 
 
+## Switching to your branch
+Run:
+   ```bash
+   git checkout <your name>
+   ```
+It's just your first name, all lowercase, no < >.
+
+
 ## NOTE:
 When we deal with the APIs you'll have to add an .env file to the backend folder. The API keys will go here. But that's not super important right now just throwing that out there. 
