@@ -1,0 +1,9 @@
+# Node.js modules
+frontend/node_modules/
+
+# Python virtual environment
+backend/venv/
+
+# Other large files
+*.log
+*.env
