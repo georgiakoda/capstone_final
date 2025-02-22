@@ -1,3 +1,19 @@
+### Update 2/22:
+We're using the Reddit API! Not pushshift! You have to install the python-dotenv package. This is just so that the private API info doesn't publish to github for everyone to see. Do:
+```bash
+    pip install python-dotenv
+```
+Then in the "backend" folder make a file called ".env". Write this this in the file:
+```bash
+    # .env file
+    REDDIT_CLIENT_ID=
+    REDDIT_CLIENT_SECRET=
+    REDDIT_USER_AGENT=
+```
+Then when youre ready to work with the API inquire within the whatsapp group chat and I'll give you the info. 
+
+
+
 # Setup Guide
 
 ## 1. Install `frontend` dependencies:
@@ -44,7 +60,3 @@ Run:
    git checkout <your name>
    ```
 It's just your first name, all lowercase, no < >.
-
-
-## NOTE:
-When we deal with the APIs you'll have to add an .env file to the backend folder. The API keys will go here. But that's not super important right now just throwing that out there. 
