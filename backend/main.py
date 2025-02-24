@@ -4,6 +4,7 @@
 #3) store the sanitized keyword in MongoDB (?)
 
 from fastapi import FastAPI
+from app.routes import router
 from fastapi import HTTPException
 from datetime import datetime
 from motor.motor_asyncio import AsyncIOMotorClient #asyncio is used to handle async requests
@@ -36,6 +37,7 @@ async def lifespan(app: FastAPI):
 #use the lifespan context manager to manage app startup and shutdown
 app = FastAPI(lifespan=lifespan)
 
+app.include_router(router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -57,6 +59,7 @@ async def handle_options():
             "Access-Control-Allow-Headers": "Content-Type"
         }
     )
+
 
 @app.get("/")
 async def read_root():
@@ -105,3 +108,6 @@ async def create_keyword(keyword: KeywordRequest):
 #4)stemming (e.g., convert 'running' to 'run') (might not be needed)
 #5)lemmatization (e.g., convert 'better' to 'good') (might not be needed)
 #6)tokenization (e.g., split sentence into words) (might not be needed)
+
+
+
