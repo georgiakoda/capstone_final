@@ -1,3 +1,11 @@
+### Update 03/10:
+To work with database, type mongosh in the terminal. If unrecognized, follow instructions for download. Once mongosh terminal is working, do:
+```bash
+    use keyword_db
+    db.keywords.find()
+```
+to be able to look at the keywords.
+
 ### Update 2/22:
 We're using the Reddit API! Not pushshift! You have to install the python-dotenv package. This is just so that the private API info doesn't publish to github for everyone to see. Do:
 ```bash
