@@ -13,6 +13,16 @@ import re #regex for pattern mathinc and manipulating strings
 import uuid #generate unique IDs for keywords
 from fastapi.middleware.cors import CORSMiddleware  #import CORSMiddleware otherwise get error. INFO: 127.0.0.1:54107 - "OPTIONS /keywords/ HTTP/1.1" 405 Method Not Allowed
 from fastapi.responses import JSONResponse
+import tracemalloc
+from app.routes import router, search_reddit
+from nltk.stem import PorterStemmer #for stemming keywords
+import nltk #stemming
+from bson import ObjectId
+
+
+tracemalloc.start()
+nltk.download('punkt')  # download tokenizer data (for keyword stemming)
+stemmer = PorterStemmer() #initialize stemmer
 
 #add CORSMiddleware to handle CORS (otherwise get 405 Method Not Allowed error)
 origins = [
@@ -69,14 +79,24 @@ class KeywordRequest(BaseModel):
 #helper fu"ction to sanitize the input (remove unwanted chars, e.g., special chars)
 def sanitize_input(input_str: str) -> str:
     sanitized = re.sub(r'[^a-zA-Z0-9 ]', '', input_str) #remove all chars except alphabets, numbers, and spaces
-    return sanitized.strip().lower() #strip leading/trailing spaces, convert to lowercase
+    sanitized = sanitized.strip().lower() #strip leading/trailing spaces, convert to lowercase
+
+    # tokenze input into words
+    words = sanitized.split()  
     
-#to further sanitize the input, we should convert it all to lowercase, and make sure we dont add conjugations of the same word to the db!
+    # apply stemming to each word
+    stemmed_words = [stemmer.stem(word) for word in words]  
+    
+    # join words back into a single string
+    stemmed = ' '.join(stemmed_words)
+
+    return sanitized, stemmed
+ 
 
 #endpoint to handle POST request:
 @app.post("/keywords/") 
 async def create_keyword(keyword: KeywordRequest):
-    sanitized_query = sanitize_input(keyword.query)
+    sanitized_query, stemmed_query = sanitize_input(keyword.query)
 
     if not sanitized_query:
         raise HTTPException(status_code=400, detail="Keyword cannot be empty or invalid.")
@@ -85,23 +105,83 @@ async def create_keyword(keyword: KeywordRequest):
 
     keyword_id = str(uuid.uuid4()) #unique identifier for keyword
     keyword_document = {
-        "_id": keyword_id, #unique ID
-        "query": sanitized_query, #search term
+        #"_id": keyword_id, #unique ID
+        "query": stemmed_query, #search term
         "created_at": created_at,  #search date
     }
 
-    #store sanitized keyword into MongoDB collection (aka table):
+    #store sanitized keyword into MongoDB collection (aka table) and send to RedditAPI
     try:
-        result = await app.db.keywords.insert_one(keyword_document) #insert document into dynamically created collection
-        return {"id": keyword_id, "query": sanitized_query, "message": "Keyword added successfuly with date", "created_at": created_at}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to store keyword in database.")
+        try:
+        #store keyword search into "keywords" MongoDB collection in keyword_db:
+            await app.db.keywords.insert_one(keyword_document) #insert document into dynamically created collection
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="Failed to store keyword in database.")
 
+        #*****************NEW CODE***************** 
+        #search reddit for the keyword
+        print(f"query: {keyword.query}")
+        try:
+            search_results = await search_reddit(sanitized_query)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="Failed to search Reddit for keyword.")
+        print(f"Search Results: {search_results}")
+        for result in search_results["results"]:
+            #store reddit search results into "search-results" MongoDB collection in keyword_db:
+            search_results_document = {
+                #"keyword_id": keyword_id, #from user search 1)
+                #search_term_id # not needed, MongoDB will automatically create a unique ID for this document 2)
+                "reddit_results": result, #3)
+                "created_at": created_at,  #search date 4)
+                "sentiment_results": None, #placeholder for sentiment analysis results #5)
+            }
+
+            await app.db.search_results.insert_one(search_results_document) #insert document into dynamically created collection "search_results"
+        return {"query": sanitized_query, "message": "Keyword added successfuly with date", "created_at": created_at, "search_results": search_results["results"]}
+        #return {"id": keyword_id, "query": sanitized_query, "message": "Keyword added successfuly with date", "created_at": created_at, "search_results": search_results["results"]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Error during create_keyword")
+"""
+#new GET endpoint to search Reddit for a keyword stored in MongoDB
+@app.get("/search_reddit/{keyword_id}")
+async def search_reddit_for_keyword(keyword_id: str):
+
+    try:
+        object_id = ObjectId(keyword_id)
+
+
+        #fetch the keyword document from MongoDB
+        keyword_document = await app.db.keywords.find_one({"_id": object_id})
+
+        if not keyword_document:
+            raise HTTPException(status_code=404, detail="Keyword not found in searc_reddit func.")
+        
+        query = keyword_document["query"]
+        #perform the Reddit search (adjust parameters as needed)
+        submissions = reddit.subreddit("all").search(query, limit=1, sort="relevance", time_filter="all")
+        
+        #format results
+        results = []
+        for submission in submissions:
+            if submission.is_self:
+                results.append({
+                    "title": submission.title,
+                    "selftext": submission.selftext,
+                    "url": submission.url,
+                    "score": submission.score,
+                    "subreddit": submission.subreddit.display_name,
+                })
+        
+        return {"results": results}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to search Reddit: {str(e)}")
+"""
 #tasks:
 #text pre-processing:
 #1)remove special characters - done
 #2)convert to lowercase - done
 #3)remove stop words (e.g., 'the', 'and', 'is', etc.) - need
-#4)stemming (e.g., convert 'running' to 'run') (might not be needed)
+#4)stemming (e.g., convert 'running' to 'run') - done
 #5)lemmatization (e.g., convert 'better' to 'good') (might not be needed)
-#6)tokenization (e.g., split sentence into words) (might not be needed)
+#6)tokenization (e.g., split sentence into words) - done

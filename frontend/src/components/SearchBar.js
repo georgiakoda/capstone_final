@@ -24,6 +24,16 @@ function SearchBar({ onSearch }) {
 
         const result = await response.json();
         console.log("Keyword added:", result);
+
+        if (result.search_results && result.search_results.length > 0) {
+          console.log("Reddit Search Results:", result.search_results);
+        } else {
+          console.log("No Reddit search results found.");
+        }
+
+        setQuery("");
+
+        
       } catch (error) {
         console.error("Error submitting keyword:", error);
       }
