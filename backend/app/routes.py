@@ -4,6 +4,8 @@ import requests
 from dotenv import load_dotenv
 import os
 from pathlib import Path
+from app.sentiment import analyze_sentiment
+
 
 #loads env file
 env_path = Path(__file__).resolve().parent.parent / ".env"
@@ -65,3 +67,17 @@ async def search_reddit(q: str):
     except Exception as e:
 
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/emotion-data")
+async def get_emotion_data():
+    test_texts = [
+        "I love this",
+        "I hate this. It's terrible.",
+        "This is so exciting I can't wait!",
+        "I'm so angry right now I hate you so much",
+        "I am so sad right now",
+        "Wow, that was surprising!",
+        "Im eating dinner at 6"
+    ]
+    results = analyze_sentiment(test_texts)
+    return results
