@@ -4,6 +4,7 @@ import requests
 from dotenv import load_dotenv
 import os
 from pathlib import Path
+#from app.sentiment import analyze_sentiment
 
 #loads env file
 env_path = Path(__file__).resolve().parent.parent / ".env"
@@ -35,7 +36,7 @@ async def search_reddit(q: str):
         #and I sort by relevance, only 1 post is returned which isnt great
         #but if I sort by new I get 10 posts that arent *super* relevant
         #might try to fix this by maybe sorting by relevance with a wider time frame? idk. something to think about. 
-        submissions = reddit.subreddit("all").search(q, limit=1, sort="relevane")
+        submissions = reddit.subreddit("all").search(q, limit=1000, sort="new", time_filter="all")
         #submissions = reddit.subreddit("all").search(q, limit=10, sort="relevance", time_filter="all")
 
         
@@ -69,3 +70,22 @@ async def search_reddit(q: str):
     except Exception as e:
 
         raise HTTPException(status_code=500, detail=str(e))
+
+""" 
+@router.get("/emotion-data")
+async def get_emotion_data():
+    test_texts = [
+        "Get out! Are you for real?! Spill the tea", #surprise?
+        "This is the most basic thing I have ever seen", #disgust?
+        "I can't believe you would do something like that", #anger?
+        "Woah, I will pretend I did not see that", #disgust?
+        "I just don't know how to cope with all the emotion I have, wow this is so on another level!", #joy?
+        "No thanks, I am good as I am", #anger?
+        "There seems to be no point to this...", #sadness?
+        "Is he really going to sign that bill? We need to stop him or else we can get in trouble", #fear?
+        "Im eating dinner at 6", #neutral
+        "Are you kidding me", #anger?
+        "Wow, totally. What a great idea. Haha." #?
+    ]
+    results = analyze_sentiment(test_texts)
+    return results"""
