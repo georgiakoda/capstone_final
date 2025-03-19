@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 import praw
 import requests
 from dotenv import load_dotenv
@@ -24,7 +24,11 @@ reddit = praw.Reddit(
 router = APIRouter()
 
 @router.get("/search/reddit/")
-async def search_reddit(q: str):
+async def search_reddit(
+    q: str,
+    subreddit: str = Query(None, description="Optional subreddit to search in"),
+    sort: str = Query("relevance", description="Sort order (new, top, hot, relevance, comments)")
+):
     """
     Endpoint to search Reddit submissions using the Reddit API.
     
@@ -32,21 +36,25 @@ async def search_reddit(q: str):
     :return: List of submissions matching the query.
     """
     try:
-        submissions = reddit.subreddit("all").search(q, limit=10, sort="new")
-        #OK so the situation here right now is, when i test the search with the query "science"
-        #and I sort by relevance, only 1 post is returned which isnt great
-        #but if I sort by new I get 10 posts that arent *super* relevant
-        #might try to fix this by maybe sorting by relevance with a wider time frame? idk. something to think about. 
         
+        sub = reddit.subreddit(subreddit) if subreddit else reddit.subreddit("all")
+
+        if sort not in ["relevance", "new", "top", "hot", "comments"]:
+            sort = "relevance"  # Fallback to default
+
+        submissions = sub.search(q, limit=3, sort=sort)
+
         #format results
         results = []
         for submission in submissions:
             if submission.is_self:  #filters for text-only posts
+                combined_text = f"{submission.title}\n\n{submission.selftext}"
                 results.append({
-                    "title": submission.title,
-                    "selftext": submission.selftext,
-                    "url": submission.url,
-                    "score": submission.score,
+                    "content": combined_text,
+                    #"title": submission.title,
+                    #"selftext": submission.selftext,
+                    #"url": submission.url,
+                    #"score": submission.score,
                     "subreddit": submission.subreddit.display_name
                 })
 
@@ -69,15 +77,27 @@ async def search_reddit(q: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/emotion-data")
-async def get_emotion_data():
-    test_texts = [
-        "I love this",
-        "I hate this. It's terrible.",
-        "This is so exciting I can't wait!",
-        "I'm so angry right now I hate you so much",
-        "I am so sad right now",
-        "Wow, that was surprising!",
-        "Im eating dinner at 6"
-    ]
-    results = analyze_sentiment(test_texts)
-    return results
+async def get_emotion_data(q: str):
+    try:
+        reddit_data = await search_reddit(q)
+        test_texts = [post["content"] for post in reddit_data["results"]]
+
+        analysis = analyze_sentiment(test_texts)
+
+        return {
+            "sentiment_results": analysis
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    #test_texts = [
+        # "I hate this. It's terrible.",
+      #  "This is so exciting I can't wait!",
+      #  "I'm so angry right now I hate you so much",
+      #  "I am so sad right now",
+      #  "Wow, that was surprising!",
+      #  "Im eating dinner at 6"
+    #]
+   # results = analyze_sentiment(test_texts)
+    #return results
