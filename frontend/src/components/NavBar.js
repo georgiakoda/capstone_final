@@ -8,14 +8,15 @@ const NavBar = () => {
     return (
         <nav className="navbar fixed-top">
             <div className="container-fluid justify-content-end mx-4">
-                <ul class="nav nav-underline">
+                <ul className="nav nav-underline">
 
                 <li className="nav-item">
                         <NavLink 
                             to="/" 
-                            className="nav-link" 
-                            aria-current="page" 
-                            activeClassName="active"
+                            className={({ isActive }) => 
+                                isActive ? "nav-link active" : "nav-link"
+                            }
+                            aria-current="page"
                         >
                             Home
                         </NavLink>
@@ -24,8 +25,9 @@ const NavBar = () => {
                     <li className="nav-item">
                         <NavLink 
                             to="/howto" 
-                            className="nav-link" 
-                            activeClassName="active" 
+                            className={({ isActive }) => 
+                                isActive ? "nav-link active" : "nav-link"
+                            }
                         >
                             How to Use
                         </NavLink>
