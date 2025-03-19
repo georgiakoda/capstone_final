@@ -19,6 +19,20 @@ Check the group chat for the value. Or message again if you can't find it I'll r
 
 This should make it so that we can all view the database online through the MongoDB website. But Tam and Mohib you have to send me the email address you have associated with your MongoDB account so I can invite you to the project. 
 
+One more thing I'm realizing we didn't explictly discuss the .gitignore, make sure you have one in the main project folder that looks like this:
+
+```bash
+   # Node.js modules
+   frontend/node_modules/
+
+   # Python virtual environment
+   backend/venv/
+
+   # Other files
+   *.log
+   *.env
+```
+
 
 
 ### Update 3/10 -Eva
