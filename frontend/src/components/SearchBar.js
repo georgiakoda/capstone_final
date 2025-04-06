@@ -7,7 +7,7 @@ import React, { useState } from "react";
 
 function SearchBar({ onSearch }) {
   const [query, setQuery] = useState("");
-  //const [sentimentResults, setSentimentResults] = useState(null);
+  const [sentimentResults, setSentimentResults] = useState(null);
 
   //new states for optional sorting and subreddit search
   const [subreddit, setSubreddit] = useState(""); // New state for subreddit
@@ -41,20 +41,15 @@ function SearchBar({ onSearch }) {
           searchParams.append("sort", sort);
         }
 
-        const redditResponse = await fetch(
-          `http://localhost:8000/search/reddit/?${searchParams.toString()}`
+        const combinedResponse = await fetch(
+          `http://localhost:8000/analyze-reddit?${searchParams.toString()}`
         );
-        const redditResult = await redditResponse.json();
-
-
-        console.log("Reddit Search Results:", redditResult.results);
-        console.log("Rate Limit Info:", redditResult.rate_limit_info);
-
-        //const emotionResponse = await fetch(`http://localhost:8000/emotion-data?q=${encodeURIComponent(query)}`);
-        //const emotionResult = await emotionResponse.json();
-        //setSentimentResults(emotionResult.sentiment_results);
-
-        //console.log("Sentiment Results:", emotionResult.sentiment_results);
+        const result = await combinedResponse.json();
+        
+        //console.log("Reddit Search Results:", result.results);
+        console.log("Sentiment Results:", result.sentiment_results);
+        
+        setSentimentResults(result.sentiment_results);
 
 
 
