@@ -1,9 +1,11 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 import praw
 import requests
 from dotenv import load_dotenv
 import os
 from pathlib import Path
+from app.sentiment import analyze_sentiment
+
 
 #loads env file
 env_path = Path(__file__).resolve().parent.parent / ".env"
@@ -21,47 +23,74 @@ reddit = praw.Reddit(
 
 router = APIRouter()
 
-@router.get("/search/reddit/")
-async def search_reddit(q: str):
-    """
-    Endpoint to search Reddit submissions using the Reddit API.
-    
-    :param q: The search query term.
-    :return: List of submissions matching the query.
-    """
-    try:
-        submissions = reddit.subreddit("all").search(q, limit=10, sort="new")
-        #OK so the situation here right now is, when i test the search with the query "science"
-        #and I sort by relevance, only 1 post is returned which isnt great
-        #but if I sort by new I get 10 posts that arent *super* relevant
-        #might try to fix this by maybe sorting by relevance with a wider time frame? idk. something to think about. 
-        
-        #format results
-        results = []
-        for submission in submissions:
-            if submission.is_self:  #filters for text-only posts
-                results.append({
-                    "title": submission.title,
-                    "selftext": submission.selftext,
-                    "url": submission.url,
-                    "score": submission.score,
-                    "subreddit": submission.subreddit.display_name
-                })
+def reddit_search_logic(q: str, subreddit: str = None, sort: str = "relevance"):
+    sub = reddit.subreddit(subreddit) if subreddit else reddit.subreddit("all")
 
-         #this is to get the rate limit info
-         #also note that the "rate limit reset" time is a unix timestamp
-         #if you need to know when the rate limit will reset, paste the value into epochconverter.com or something similar
-        rate_limit_info = {
-            "rate_limit_remaining": reddit.auth.limits.get("remaining"),
-            "rate_limit_used": reddit.auth.limits.get("used"),
-            "rate_limit_reset": reddit.auth.limits.get("reset_timestamp")
-        }
-        
+    if sort not in ["relevance", "new", "top", "hot", "comments"]:
+        sort = "relevance"
+
+    submissions = sub.search(q, limit=15, sort=sort)
+
+    results = []
+    for submission in submissions:
+        if submission.is_self:
+            combined_text = f"{submission.title}\n\n{submission.selftext}"
+            results.append({
+                "content": combined_text,
+                "subreddit": submission.subreddit.display_name
+            })
+
+    rate_limit_info = {
+        "rate_limit_remaining": reddit.auth.limits.get("remaining"),
+        "rate_limit_used": reddit.auth.limits.get("used"),
+        "rate_limit_reset": reddit.auth.limits.get("reset_timestamp")
+    }
+
+    return {
+        "results": results,
+        "rate_limit_info": rate_limit_info
+    }
+
+
+@router.get("/search/reddit/")
+async def search_reddit(
+    q: str,
+    subreddit: str = Query(None, description="Optional subreddit to search in"),
+    sort: str = Query("relevance", description="Sort order (new, top, hot, relevance, comments)")
+):
+    try:
+        return reddit_search_logic(q, subreddit=subreddit, sort=sort)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/analyze-reddit")
+async def analyze_reddit(
+    q: str,
+    subreddit: str = Query(None),
+    sort: str = Query("relevance")
+):
+    try:
+        print(f"searching term: '{q}' in subreddit: '{subreddit}'")
+
+        reddit_data = reddit_search_logic(q, subreddit=subreddit, sort=sort)
+        texts = [post["content"] for post in reddit_data["results"]]
+
+        if not texts:
+            return {
+                "results": [],
+                "rate_limit_info": reddit_data["rate_limit_info"],
+                "sentiment_results": {"results": [], "max_emotion_counts": {}}
+            }
+
+        sentiment = analyze_sentiment(texts)
+
         return {
-            "results": results,
-            "rate_limit_info": rate_limit_info
+            "results": reddit_data["results"],
+            "rate_limit_info": reddit_data["rate_limit_info"],
+            "sentiment_results": sentiment
         }
 
     except Exception as e:
-
+        print(f"ERROR in /analyze-reddit: {e}")
         raise HTTPException(status_code=500, detail=str(e))

@@ -14,6 +14,9 @@ import re #regex for pattern mathinc and manipulating strings
 import uuid #generate unique IDs for keywords
 from fastapi.middleware.cors import CORSMiddleware  #import CORSMiddleware otherwise get error. INFO: 127.0.0.1:54107 - "OPTIONS /keywords/ HTTP/1.1" 405 Method Not Allowed
 from fastapi.responses import JSONResponse
+import os
+from dotenv import load_dotenv
+
 
 #add CORSMiddleware to handle CORS (otherwise get 405 Method Not Allowed error)
 origins = [
@@ -21,13 +24,16 @@ origins = [
     "http://localhost:3000",  #for example if using react's default port
 ]
 
+load_dotenv() 
+MONGO_URI = os.getenv("MONGO_URI")
+
 #lifespan event handler to manage startup/shutdown of the app
 #using asynccontextmanager decorator. Context manager defines async setup and teardown (release resources)
 #useful for tasks involving async operations like connecting to DB, making network requests, etc.
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     #startup: initialize MongoDB client
-    app.mongodb_client = AsyncIOMotorClient("mongodb://localhost:27017") 
+    app.mongodb_client = AsyncIOMotorClient(MONGO_URI) 
     app.db = app.mongodb_client.keyword_db #keyword_db is our database name
     print(f"Connected to database: {app.db.name}")
     yield
