@@ -102,6 +102,11 @@ async def create_keyword(keyword: KeywordRequest):
         return {"id": keyword_id, "query": sanitized_query, "message": "Keyword added successfuly with date", "created_at": created_at}
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to store keyword in database.")
+# Endpoint to fetch all keywords
+@app.get("/keywords/")
+async def get_keywords():
+    keywords = await app.db.keywords.find().to_list(length=100)
+    return keywords
 
 #tasks:
 #text pre-processing:
