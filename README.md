@@ -1,4 +1,4 @@
-###Update 4/6 - Mohib
+**###Update 4/6 - Mohib**
 
 **BackEnd**
 Prevented duplicate keywords from being added to the database
