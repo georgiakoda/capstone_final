@@ -29,11 +29,7 @@ def analyze_sentiment(texts):
     :return: DataFrame with sentiment analysis results.
     """
     # tokenizes texts and creates prediction dataset
-<<<<<<< HEAD
-    tokenized_texts = tokenizer(texts, truncation=True, padding=True)
-=======
     tokenized_texts = tokenizer(texts, truncation=True, padding=True, return_tensors="pt")
->>>>>>> origin/main
     pred_dataset = SimpleDataset(tokenized_texts)
 
     predictions = trainer.predict(pred_dataset)
@@ -42,11 +38,6 @@ def analyze_sentiment(texts):
     preds = predictions.predictions.argmax(-1)
     labels = pd.Series(preds).map(model.config.id2label)
 
-<<<<<<< HEAD
-    scores = (np.exp(predictions[0]) / np.exp(predictions[0]).sum(-1, keepdims=True)).max(1)
-
-=======
->>>>>>> origin/main
     temp = (np.exp(predictions[0]) / np.exp(predictions[0]).sum(-1, keepdims=True))
 
     emotion_labels = ["anger", "disgust", "fear", "joy", "neutral", "sadness", "surprise"]
@@ -76,7 +67,3 @@ def analyze_sentiment(texts):
     return {"results": formatted_results, "max_emotion_counts": dict(max_emotion_counts)}
 
 
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/main

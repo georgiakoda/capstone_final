@@ -10,7 +10,7 @@ const NavBar = () => {
             <div className="container-fluid justify-content-end mx-4">
                 <ul className="nav nav-underline">
 
-                <li className="nav-item">
+                    <li className="nav-item">
                         <NavLink 
                             to="/" 
                             className={({ isActive }) => 
@@ -32,6 +32,26 @@ const NavBar = () => {
                             How to Use
                         </NavLink>
                     </li>
+
+                    <li className="nav-item">
+                        <NavLink 
+                            to="/about" 
+                            className={({ isActive }) => 
+                                isActive ? "nav-link active" : "nav-link"
+                            }
+                        >
+                            About Me
+                        </NavLink>
+                        
+                    </li>
+                    <li className="nav-item">
+  <NavLink 
+    to="/history" 
+    className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+  >
+    History
+  </NavLink>
+</li>
 
 
                 </ul>
