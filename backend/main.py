@@ -22,8 +22,7 @@ origins = [
 ]
 
 load_dotenv() 
-#MONGO_URI = os.getenv("MONGO_URI")
-MONGO_URI = "mongodb://localhost:27017"
+MONGO_URI = os.getenv("MONGO_URI")
 
 #lifespan event handler to manage startup/shutdown of the app
 #using asynccontextmanager decorator. Context manager defines async setup and teardown (release resources)

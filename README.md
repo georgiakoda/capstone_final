@@ -1,12 +1,58 @@
-### Update 03/10:
+### Update 3/19 -Georgia
+Updated frontend using Bootstrap. Do this in the frontend folder:
+
+```bash
+   npm install bootstrap bootstrap-icons react-router-dom
+```
+bootstrap and bootstrap-icons is for styling and react-router-dom is for page navigation
+
+#### Info about getting the Reddit search endpoint to work
+Apparently to get it working you need to either set up your own reddit app and get your own API credentials (select "script" not "web app") OR give me your reddit username so I can add you as a developer and you can use the reddit API credentials I put in the gc. 
+
+#### Mongo DB update
+In the .env file I asked you to add in the 2/22 update, add this field:
+
+```bash
+   MONGO_URI=
+```
+Check the group chat for the value. Or message again if you can't find it I'll resend it. Make sure you don't upload your .env file to the github, it's public! It should be listed in your .gitignore file like: *.env so it doesn't upload but just make sure you don't upload it. 
+
+This should make it so that we can all view the database online through the MongoDB website. But Tam and Mohib you have to send me the email address you have associated with your MongoDB account so I can invite you to the project. 
+
+One more thing I'm realizing we didn't explictly discuss the .gitignore, make sure you have one in the main project folder that looks like this:
+
+```bash
+   # Node.js modules
+   frontend/node_modules/
+
+   # Python virtual environment
+   backend/venv/
+
+   # Other files
+   *.log
+   *.env
+```
+
+
+
+### Update 3/10 -Eva
 To work with database, type mongosh in the terminal. If unrecognized, follow instructions for download. Once mongosh terminal is working, do:
+
 ```bash
     use keyword_db
     db.keywords.find()
 ```
+<<<<<<< HEAD
 to be able to look at the keywords.
 
 ### Update 2/22:
+=======
+
+to be able to look at the keywords.
+
+
+### Update 2/22 -Georgia
+>>>>>>> origin/main
 We're using the Reddit API! Not pushshift! You have to install the python-dotenv package. This is just so that the private API info doesn't publish to github for everyone to see. Do:
 ```bash
     pip install python-dotenv
