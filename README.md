@@ -1,3 +1,16 @@
+**###Update 4/6 - Mohib**
+
+**BackEnd**
+Prevented duplicate keywords from being added to the database
+Added a new GET /keywords/ endpoint to fetch keyword search history
+
+**Frontend**
+Created a Keyword History page to show all previously searched keywords
+Built an About Us section
+Added axios to fetch data from backend
+And updated the NavBar with about us and history section
+
+
 ### Update 3/19 -Georgia
 Updated frontend using Bootstrap. Do this in the frontend folder:
 
