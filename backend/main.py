@@ -20,7 +20,8 @@ from dotenv import load_dotenv
 # add CORSMiddleware to handle CORS (otherwise get 405 Method Not Allowed error)
 origins = [
     "http://localhost",  # allow frontend (localhost)
-    "http://localhost:3000",  # for example if using react's default port
+    "http://localhost:3000",
+    "http://localhost:8000"  # for example if using react's default port
 ]
 
 load_dotenv()
