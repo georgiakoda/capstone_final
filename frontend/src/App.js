@@ -5,6 +5,7 @@ import NavBar from './components/NavBar';
 import HowTo from './components/HowTo';
 import About from './components/about';
 import KeywordHistory from './components/KeywordHistory';
+import Results from './components/Results';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -40,6 +41,7 @@ function App() {
   <Route path="/howto" element={<HowTo />} />
   <Route path="/about" element={<About />} />
   <Route path="/history" element={<KeywordHistory />} />
+  <Route path="/results" element={<Results />} />
 
 </Routes>
 
