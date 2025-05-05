@@ -1,10 +1,12 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import FastAPI, APIRouter, HTTPException, Query
+from fastapi.responses import HTMLResponse
 import praw
 import requests
 from dotenv import load_dotenv
 import os
 from pathlib import Path
 from app.sentiment import analyze_sentiment
+from pydantic import BaseModel
 
 
 #loads env file
@@ -94,3 +96,12 @@ async def analyze_reddit(
     except Exception as e:
         print(f"ERROR in /analyze-reddit: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+#for graph display:
+#it looks useless i know but it is not 
+class EmotionData(BaseModel):
+    max_emotion_counts: dict
+
+@router.post("/emotion-graph")
+async def get_emotion_graph(emotion_data: EmotionData):
+    return emotion_data.max_emotion_counts

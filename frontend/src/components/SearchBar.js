@@ -2,16 +2,19 @@
 //1)capture user input
 //2)send user input to backend
 //3)handle the response
+import { useNavigate } from "react-router-dom";
 
 import React, { useState } from "react";
 
-function SearchBar({ onSearch }) {
+function SearchBar() {
   const [query, setQuery] = useState("");
   const [sentimentResults, setSentimentResults] = useState(null);
 
   //new states for optional sorting and subreddit search
   const [subreddit, setSubreddit] = useState(""); // New state for subreddit
   const [sort, setSort] = useState(""); // New state for sorting option
+  const navigate = useNavigate();
+
 
 
   //Handle form submission
@@ -50,6 +53,8 @@ function SearchBar({ onSearch }) {
         console.log("Sentiment Results:", result.sentiment_results);
         
         setSentimentResults(result.sentiment_results);
+        console.log("navigating to results...");
+        navigate("/results", { state: { sentimentResults: result.sentiment_results } });
 
 
 

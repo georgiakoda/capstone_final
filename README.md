@@ -1,3 +1,9 @@
+### Update 5/5 - Georgia
+Graph is made using plotly, so do this in the frontend folder:
+```bash
+   npm install plotly.js-dist-min
+```
+
 **###Update 4/6 - Mohib**
 
 **BackEnd**

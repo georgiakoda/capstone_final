@@ -41,9 +41,9 @@ def analyze_sentiment(texts):
     temp = (np.exp(predictions[0]) / np.exp(predictions[0]).sum(-1, keepdims=True))
 
     emotion_labels = ["anger", "disgust", "fear", "joy", "neutral", "sadness", "surprise"]
-
+    max_emotion_counts = {emotion: 0 for emotion in emotion_labels}
     formatted_results = []
-    max_emotion_counts = Counter()
+
     for i in range(len(texts)):
         scores = {emotion_labels[j]: float(temp[i][j]) for j in range(len(emotion_labels))}
 
@@ -54,13 +54,7 @@ def analyze_sentiment(texts):
         # stores the text, its numerical score for each emotion, and then the dominant emotion 
         formatted_results.append({
             "text": texts[i],  
-            "anger": float(temp[i][0]),
-            "disgust": float(temp[i][1]),
-            "fear": float(temp[i][2]),
-            "joy": float(temp[i][3]),
-            "neutral": float(temp[i][4]),
-            "sadness": float(temp[i][5]),
-            "surprise": float(temp[i][6]),
+            **scores,
             "max_emotion": max_emotion 
         })
 

@@ -45,14 +45,14 @@ const NavBar = () => {
                         
                     </li>
                     <li className="nav-item">
-  <NavLink 
-    to="/history" 
-    className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
-  >
-    History
-  </NavLink>
-</li>
-
+                        
+                        <NavLink 
+                            to="/history" 
+                            className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+                        >
+                            History
+                        </NavLink>
+                    </li>
 
                 </ul>
             </div>
