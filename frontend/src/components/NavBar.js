@@ -53,16 +53,6 @@ const NavBar = () => {
                             History
                         </NavLink>
                     </li>
-                    <li className="nav-item">
-                        
-                        <NavLink 
-                            to="/results" 
-                            className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
-                        >
-                            Results (only visible for testing purposes)
-                        </NavLink>
-                    </li>
-
 
                 </ul>
             </div>
