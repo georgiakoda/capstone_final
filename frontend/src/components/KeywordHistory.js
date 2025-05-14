@@ -13,8 +13,9 @@ const KeywordHistory = () => {
   return (
     <div className="container pt-5 my-4">
       <h2 className="pb-2 border-bottom">🔁 Keyword History</h2>
-
-      {keywords.length === 0 ? (
+      
+      <div className="my-4">
+        {keywords.length === 0 ? (
         <p className="text-muted">No keywords found yet.</p>
       ) : (
         <ul className="list-group">
@@ -26,6 +27,8 @@ const KeywordHistory = () => {
           ))}
         </ul>
       )}
+      </div>
+
     </div>
   );
 };
