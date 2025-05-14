@@ -46,6 +46,7 @@ const HowTo = () => (
                         <h3 className="card-title"><i className="bi bi-lightbulb mx-2"></i>Tips for Best Results</h3>
                         <ul>
                             <li>Use specific keywords for more accurate results</li>
+                            <li>Sort by "new" to get more post results</li>
                             <li>Try different variations of your search term</li>
                             <li>Check the keyword history for previous searches</li>
                             <li>Look for patterns in sentiment across different time periods</li>
