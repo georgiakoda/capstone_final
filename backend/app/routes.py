@@ -8,7 +8,8 @@ from pathlib import Path
 from app.sentiment import analyze_sentiment
 from pydantic import BaseModel
 from fastapi.concurrency import run_in_threadpool
-
+from fastapi import Query, Request  # Add Request
+from datetime import datetime
 
 #loads env file
 env_path = Path(__file__).resolve().parent.parent / ".env"
@@ -67,26 +68,38 @@ async def search_reddit(
         raise HTTPException(status_code=500, detail=str(e))
 
 from fastapi import Query
-
 @router.get("/analyze-reddit")
 async def analyze_reddit(
+    request: Request,  # <<<<<< ADDED
     q: str,
     subreddit: str = Query(None),
     sort: str = Query("relevance"),
-    limit: int = Query(500, ge=10, le=700, description="Number of posts to fetch (10-700)")
+    limit: int = Query(10, ge=10, le=700)
 ):
     try:
         print(f"searching term: '{q}' in subreddit: '{subreddit}' with limit {limit}")
 
+        # 1. Create unique cache key
+        key = f"{q.lower()}_{subreddit}_{sort}_{limit}"
+
+        # 2. Check MongoDB for cached result
+        cached = await request.app.db.sentiment_results.find_one({"_id": key})
+        if cached:
+            print("✅ Returning cached result from DB")
+            return cached["data"]
+
+        # 3. Perform search and sentiment analysis
         reddit_data = reddit_search_logic(q, subreddit=subreddit, sort=sort, limit=limit)
         texts = [post["content"] for post in reddit_data["results"]]
 
         if not texts:
-            return {
+            empty_response = {
                 "results": [],
                 "rate_limit_info": reddit_data["rate_limit_info"],
                 "sentiment_results": {"results": [], "max_emotion_counts": {}}
             }
+            return empty_response
+
         sentiment = await run_in_threadpool(analyze_sentiment, texts)
 
         enriched_results = []
@@ -97,13 +110,22 @@ async def analyze_reddit(
                 "text": emotion_data["text"]
             })
 
-        return {
+        final_response = {
             "results": enriched_results,
             "rate_limit_info": reddit_data["rate_limit_info"],
             "sentiment_results": {
                 "max_emotion_counts": sentiment["max_emotion_counts"]
             }
         }
+
+        # 4. Store result in cache
+        await request.app.db.sentiment_results.insert_one({
+            "_id": key,
+            "data": final_response,
+            "created_at": datetime.utcnow()
+        })
+
+        return final_response
 
     except Exception as e:
         print(f"ERROR in /analyze-reddit: {e}")
