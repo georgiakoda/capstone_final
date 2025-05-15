@@ -6,9 +6,10 @@ function SearchBar() {
   const [query, setQuery] = useState("");
   const [sentimentResults, setSentimentResults] = useState(null);
   const [subreddit, setSubreddit] = useState("");
-  const [sort, setSort] = useState(""); 
+  const [sort, setSort] = useState("new"); 
   const navigate = useNavigate();
   const [limit, setLimit] = useState(10);
+
 
 
 
@@ -105,12 +106,13 @@ function SearchBar() {
             onChange={(e) => setSort(e.target.value)}
             className="form-select w-auto"  
           >
-            <option value="">Sort by: </option>
-            <option value="relevance">relevance</option>
+            <option value="" disabled>Sort by:</option>
             <option value="new">new</option>
+            <option value="relevance">relevance</option>
             <option value="top">top</option>
             <option value="hot">hot</option>
             <option value="comments">comments</option>
+
           </select>
 
           <input
