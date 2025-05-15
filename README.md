@@ -1,10 +1,74 @@
+# Setup Guide
+
+## 1. Install `frontend` dependencies:
+   ```bash
+   cd frontend
+   npm install
+   ```
+   
+## 2. Install `backend` dependencies:
+   ```bash
+   cd backend
+
+   python -m venv venv
+   source venv/bin/activate  # On macOS/Linux
+   venv\Scripts\activate     # On Windows
+
+   pip install -r requirements.txt
+   ```
+## 3. API Keys
+You will need to create an .env file in the `backend` folder. It should look like:
+
+   ```bash
+    REDDIT_CLIENT_ID=
+    REDDIT_CLIENT_SECRET=
+    REDDIT_USER_AGENT=WhateverYouNamedYourProject (by /u/yourusername)
+
+    MONGO_URI=
+   ```
+To get your own REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET, go to https://www.reddit.com/prefs/apps/ and create a new app. Select "script" as the app type. The Client ID should be in the top left corner underneath "personal use script" and the Client Secret is the string next to "secret". 
+
+As for the MONGO_URI value, if you're our professor, Georgia emailed it to you. If you're having trouble getting the database part to work, I might have to invite you to the project as a Project Owner on MongoDB so just email Georgia again. 
+
+If you want to use your own MongoDB cluster, go to "Connect", click "Drivers", select Python from the drop down menu (this project uses Python 3.9.6) and copy paste the value inside the quotations that follows `uri =` in the code sample. 
+
+
+## 4. Run
+Go to the backend folder and run:
+   ```bash
+   uvicorn main:app --reload
+   ```
+If everything is good it should say something like:
+   ```bash
+   INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+   INFO:     Started reloader process [12345] using StatReload
+   INFO:     Started server process [12346]
+   INFO:     Waiting for application startup.
+   INFO:     Application startup complete.
+   ```
+Next, go to the frontend folder and run:
+   ```bash
+   npm start
+   ```
+If set up correctly a browser window should open on http://localhost:3000/
+
+## 5. Use
+Enter a search term in the text box on the homepage. Optionally, you can specify a subreddit to search in as well as a filter (top, new, relevance, hot or comments). If no subreddit is provided, it will default to searching all. If no filter is selected, it will default to sorting by relevance. 
+
+The app is set up to return maximum 15 posts, but the Reddit API typically will not return more than 10 posts. You can change this value in the `routes.py` file inside the `reddit_search_logic` function. By nature the Reddit API will only return relatively recent posts anyway. 
+
+Note: sorting by relevance will limit the amount of posts returned significantly. Consider sorting by new to get more posts. 
+
+
+# Below this point are updates that were used for team communication, disregard them
+
 ### Update 5/5 - Georgia
 Graph is made using plotly, so do this in the frontend folder:
 ```bash
    npm install plotly.js-dist-min
 ```
 
-**###Update 4/6 - Mohib**
+### Update 4/6 - Mohib
 
 **BackEnd**
 Prevented duplicate keywords from being added to the database
@@ -52,8 +116,6 @@ One more thing I'm realizing we didn't explictly discuss the .gitignore, make su
    *.env
 ```
 
-
-
 ### Update 3/10 -Eva
 To work with database, type mongosh in the terminal. If unrecognized, follow instructions for download. Once mongosh terminal is working, do:
 
@@ -78,52 +140,3 @@ Then in the "backend" folder make a file called ".env". Write this this in the f
     REDDIT_USER_AGENT=
 ```
 Then when youre ready to work with the API inquire within the whatsapp group chat and I'll give you the info. 
-
-
-
-# Setup Guide
-
-## 1. Install `frontend` dependencies:
-   ```bash
-   cd frontend
-   npm install
-   ```
-   
-## 2. Install `backend` dependencies:
-   ```bash
-   cd backend
-
-   python -m venv venv
-   source venv/bin/activate  # On macOS/Linux
-   venv\Scripts\activate     # On Windows
-
-   pip install -r requirements.txt
-   ```
-## 3. Test
-Go to the frontend folder and try running:
-   ```bash
-   npm start
-   ```
-If it works a browser window should open on http://localhost:3000/
-
-Next, go to the backend folder and run:
-   ```bash
-   uvicorn main:app --reload
-   ```
-If everything is good it should say:
-   ```bash
-   INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-   INFO:     Started reloader process [12345] using StatReload
-   INFO:     Started server process [12346]
-   INFO:     Waiting for application startup.
-   INFO:     Application startup complete.
-   ```
-In your broswer go to: http://127.0.0.1:8000/
-and a JSON should show up with the message "test". 
-
-## Switching to your branch
-Run:
-   ```bash
-   git checkout <your name>
-   ```
-It's just your first name, all lowercase, no < >.
