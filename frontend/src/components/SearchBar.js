@@ -8,6 +8,8 @@ function SearchBar() {
   const [subreddit, setSubreddit] = useState("");
   const [sort, setSort] = useState(""); 
   const navigate = useNavigate();
+  const [limit, setLimit] = useState(10);
+
 
 
 
@@ -15,6 +17,10 @@ function SearchBar() {
   const handleSubmit = async (e) => { 
     e.preventDefault();
     if (query.trim()) { //remove leading and trailing whitespaces
+      if (limit < 10 || limit > 700) {
+        alert("Please enter a limit between 10 and 700.");
+        return;
+      }
       //send keyword to FastAPI backend for sanitization and storage into DB
       try {
         const userId = "test-user-id";
@@ -31,7 +37,9 @@ function SearchBar() {
 
         const searchParams = new URLSearchParams({
           q: query,
+          limit: limit.toString(),
         });
+
 
         if (subreddit.trim()) {
           searchParams.append("subreddit", subreddit);
@@ -104,6 +112,17 @@ function SearchBar() {
             <option value="hot">hot</option>
             <option value="comments">comments</option>
           </select>
+
+          <input
+            type="number"
+            min={10}
+            max={700}
+            value={limit}
+            onChange={(e) => setLimit(Number(e.target.value))}
+            className="form-control limit-input"
+            placeholder="Limit"
+            style={{ width: "80px" }}
+          />
 
           <button type="submit" className="btn btn-primary btn-md w-auto custom-btn">Search</button>
 

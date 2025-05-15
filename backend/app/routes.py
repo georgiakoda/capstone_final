@@ -26,13 +26,13 @@ reddit = praw.Reddit(
 
 router = APIRouter()
 
-def reddit_search_logic(q: str, subreddit: str = None, sort: str = "relevance"):
+def reddit_search_logic(q: str, subreddit: str = None, sort: str = "relevance", limit: int = 10):
     sub = reddit.subreddit(subreddit) if subreddit else reddit.subreddit("all")
 
     if sort not in ["relevance", "new", "top", "hot", "comments"]:
         sort = "relevance"
 
-    submissions = sub.search(q, limit=500, sort=sort)
+    submissions = sub.search(q, limit=limit, sort=sort)
 
     results = []
     for submission in submissions:
@@ -55,7 +55,6 @@ def reddit_search_logic(q: str, subreddit: str = None, sort: str = "relevance"):
     }
 
 
-
 @router.get("/search/reddit/")
 async def search_reddit(
     q: str,
@@ -67,17 +66,19 @@ async def search_reddit(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+from fastapi import Query
 
 @router.get("/analyze-reddit")
 async def analyze_reddit(
     q: str,
     subreddit: str = Query(None),
-    sort: str = Query("relevance")
+    sort: str = Query("relevance"),
+    limit: int = Query(500, ge=10, le=700, description="Number of posts to fetch (10-700)")
 ):
     try:
-        print(f"searching term: '{q}' in subreddit: '{subreddit}'")
+        print(f"searching term: '{q}' in subreddit: '{subreddit}' with limit {limit}")
 
-        reddit_data = reddit_search_logic(q, subreddit=subreddit, sort=sort)
+        reddit_data = reddit_search_logic(q, subreddit=subreddit, sort=sort, limit=limit)
         texts = [post["content"] for post in reddit_data["results"]]
 
         if not texts:
@@ -86,16 +87,14 @@ async def analyze_reddit(
                 "rate_limit_info": reddit_data["rate_limit_info"],
                 "sentiment_results": {"results": [], "max_emotion_counts": {}}
             }
-        sentiment = await run_in_threadpool(analyze_sentiment, texts) ########new
+        sentiment = await run_in_threadpool(analyze_sentiment, texts)
 
-
-        # Merge emotion data into each post
         enriched_results = []
         for original_post, emotion_data in zip(reddit_data["results"], sentiment["results"]):
             enriched_results.append({
                 **original_post,
                 "max_emotion": emotion_data["max_emotion"],
-                "text": emotion_data["text"]  # Optional: for debugging or use
+                "text": emotion_data["text"]
             })
 
         return {

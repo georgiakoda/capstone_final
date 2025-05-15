@@ -127,7 +127,7 @@
 
 .input-group {
   max-width: 400px;  /* control width of subreddit input group */
-  margin-left: 356px;    /* reset margin so it aligns */
+  margin-left: 260px;    /* reset margin so it aligns */
 }
 
 .subreddit-input {
@@ -194,3 +194,10 @@
 .close-button:hover {
   transform: scale(1.45); /* scale up 5% */
 }
+
+.limit-input {
+  width: 80px;
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
