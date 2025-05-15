@@ -66,6 +66,7 @@ function Results() {
                     marker: {
                         color: colors
                     }
+
                 }];
 
                 const layout = {
@@ -89,6 +90,7 @@ function Results() {
 
     const emotionCounts = sentimentResults.max_emotion_counts;
 
+
     const emotionEmojis = {
         anger: '😡',
         sadness: '😢',
@@ -104,11 +106,13 @@ function Results() {
     const getPostTitle = (content) => content.split('\n\n')[0];
     const getPostBody = (content) => content.split('\n\n').slice(1).join('\n\n');
 
+
     return (
         <div className="container px-4 pt-4 my-4">
             <h2 className="pb-2 border-bottom">
                 Search Analysis <i className="bi bi-bar-chart mx-2"></i>
             </h2>
+
 
             <h3 className="my-4">Results for "<strong>{query}</strong>" in r/{subreddit || 'all'}:</h3>
 
@@ -167,6 +171,7 @@ function Results() {
 
             </div>
             
+
         {selectedEmotion && (
         <div className="modal-overlay">
             <div className="modal-content">
@@ -182,6 +187,7 @@ function Results() {
             </div>
         </div>
         )}
+
         </div>
     );
 }

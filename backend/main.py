@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware  # import CORSMiddleware othe
 from fastapi.responses import JSONResponse
 import os
 from dotenv import load_dotenv
+
 from pymongo import MongoClient
 import certifi
 """
@@ -46,6 +47,7 @@ async def lifespan(app: FastAPI):
     # shutdown: close MongoDB client
     app.mongodb_client.close()
 
+
 # use the lifespan context manager to manage app startup and shutdown
 app = FastAPI(lifespan=lifespan)
 
@@ -69,6 +71,13 @@ async def read_root():
 class KeywordRequest(BaseModel):
     query: str
     user_id: str
+
+    
+# Define a Pydantic model for Sentiment results    
+class SentimentResult(BaseModel):
+    keyword_id: str  # matches the _id in keywords collection
+    total_analyzed: int
+    sentiment_breakdown: Dict[str, int]  
 
 # helper fu"ction to sanitize the input (remove unwanted chars, e.g., special chars)
 def sanitize_input(input_str: str) -> str:
