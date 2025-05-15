@@ -130,6 +130,20 @@ async def analyze_reddit(
     except Exception as e:
         print(f"ERROR in /analyze-reddit: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.get("/cached-results")
+async def get_all_cached_results(request: Request):
+    try:
+        cursor = request.app.db.sentiment_results.find().sort("created_at", -1)
+        results = []
+        async for doc in cursor:
+            results.append({
+                "query_key": doc["_id"],
+                "data": doc["data"]
+            })
+        return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 #for graph display:

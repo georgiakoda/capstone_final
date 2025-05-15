@@ -7,6 +7,7 @@ import HowTo from './components/HowTo';
 import About from './components/about';
 import KeywordHistory from './components/KeywordHistory';
 import Results from './components/Results';
+import CachedResults from './components/CachedResults';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React from 'react';
@@ -33,6 +34,8 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/history" element={<KeywordHistory />} />
           <Route path="/results" element={<Results />} />
+          <Route path="/cached" element={<CachedResults />} />
+
         </Routes>
       </AppWrapper>
     </Router>
