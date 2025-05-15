@@ -53,9 +53,9 @@ Next, go to the frontend folder and run:
 If set up correctly a browser window should open on http://localhost:3000/
 
 ## 5. Use
-Enter a search term in the text box on the homepage. Optionally, you can specify a subreddit to search in as well as a filter (top, new, relevance, hot or comments). If no subreddit is provided, it will default to searching all. If no filter is selected, it will default to sorting by relevance. 
+Enter a search term in the text box on the homepage. Optionally, you can specify a subreddit to search in as well as a filter (top, new, relevance, hot or comments). If no subreddit is provided, it will default to searching all. If no filter is selected, it will default to sorting by relevance. DO NOT INCLUDE SPACES IN THE SUBREDDIT NAME! It won't return any results. 
 
-The app is set up to return maximum 15 posts, but the Reddit API typically will not return more than 10 posts. You can change this value in the `routes.py` file inside the `reddit_search_logic` function. By nature the Reddit API will only return relatively recent posts anyway. 
+You can also select how many posts you would like to return. The Reddit API will typically return less than selected.
 
 Note: sorting by relevance will limit the amount of posts returned significantly. Consider sorting by new to get more posts. 
 
