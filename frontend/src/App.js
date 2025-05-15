@@ -1,21 +1,30 @@
 import './App.css';
-import SearchBar from './components/SearchBar';
+import Home from './components/Home';
+
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import NavBar from './components/NavBar';
+import HowTo from './components/HowTo';
+import About from './components/about';
+import KeywordHistory from './components/KeywordHistory';
+import Results from './components/Results';
+
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <h1> Sentiment Analysis Tool</h1>
-        <h4> Enter a search term below: </h4>
-        <SearchBar />
-        
-      </header>
-    
-      <div>
-        
-      </div>
 
-    </div>
+  return (
+    <Router>
+      <div className="App">
+        <NavBar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/howto" element={<HowTo />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/history" element={<KeywordHistory />} />
+          <Route path="/results" element={<Results />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

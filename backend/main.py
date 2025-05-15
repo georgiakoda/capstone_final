@@ -19,6 +19,7 @@ from dotenv import load_dotenv
 from typing import Dict
 from fastapi import Query
 
+
 # add CORSMiddleware to handle CORS (otherwise get 405 Method Not Allowed error)
 origins = [
     "http://localhost",  # allow frontend (localhost)
@@ -41,6 +42,7 @@ async def lifespan(app: FastAPI):
     yield
     # shutdown: close MongoDB client
     app.mongodb_client.close()
+
 
 # use the lifespan context manager to manage app startup and shutdown
 app = FastAPI(lifespan=lifespan)
@@ -74,6 +76,7 @@ async def read_root():
 # pydantic model for request body
 class KeywordRequest(BaseModel):
     query: str
+
     
 # Define a Pydantic model for Sentiment results    
 class SentimentResult(BaseModel):
@@ -116,6 +119,7 @@ async def create_keyword(keyword: KeywordRequest):
 async def get_keywords():
     keywords = await app.db.keywords.find().to_list(length=100)
     return keywords
+
     
 @app.post("/results/")
 async def store_sentiment_result(data: SentimentResult):
