@@ -25,8 +25,8 @@
   
   /* Remove flex centering */
   display: block;               /* instead of flex */
-  padding-top: 18rem;           /* static spacing from top */
-  padding-left: 2rem;
+  padding-top: 15.4rem;           /* static spacing from top */
+  padding-left: 1.6rem;
   padding-right: 2rem;
 
   text-align: center;

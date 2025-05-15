@@ -83,9 +83,9 @@ function Results() {
     const emotionEmojis = {
         anger: '😡',
         sadness: '😢',
-        joy: '😊',
+        joy: '😀',
         disgust: '🤢',
-        fear: '😱',
+        fear: '😨',
         neutral: '😐',
         surprise: '😲'
     };
