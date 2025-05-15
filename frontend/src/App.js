@@ -7,14 +7,26 @@ import HowTo from './components/HowTo';
 import About from './components/about';
 import KeywordHistory from './components/KeywordHistory';
 import Results from './components/Results';
+import CachedResults from './components/CachedResults';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import React from 'react';
+import { useLocation } from 'react-router-dom';
+
+function AppWrapper({ children }) {
+  const location = useLocation();
+
+  // Determine class based on current path
+  const backgroundClass = location.pathname === '/' ? 'home-background' : 'smiley-background';
+
+  return <div className={`App ${backgroundClass}`}>{children}</div>;
+}
+
 
 function App() {
-
   return (
     <Router>
-      <div className="App">
+      <AppWrapper>
         <NavBar />
         <Routes>
           <Route path="/" element={<Home />} />
@@ -22,10 +34,13 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/history" element={<KeywordHistory />} />
           <Route path="/results" element={<Results />} />
+          <Route path="/cached" element={<CachedResults />} />
+
         </Routes>
-      </div>
+      </AppWrapper>
     </Router>
   );
 }
+
 
 export default App;

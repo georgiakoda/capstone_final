@@ -7,6 +7,15 @@ function Results() {
     const { sentimentResults, query, subreddit, results = [] } = location.state || {};
     const graphRef = useRef(null);
     const [expandedPostIndex, setExpandedPostIndex] = useState(null);
+    const [selectedEmotion, setSelectedEmotion] = useState(null);
+    const [selectedEmotionPosts, setSelectedEmotionPosts] = useState([]);
+
+    const handleEmotionClick = (emotion) => {
+        const filtered = results.filter(post => post.max_emotion === emotion);
+        setSelectedEmotion(emotion);
+        setSelectedEmotionPosts(filtered);
+    };
+
 
     //this handles the graph display
     useEffect(() => {
@@ -85,9 +94,9 @@ function Results() {
     const emotionEmojis = {
         anger: '😡',
         sadness: '😢',
-        joy: '😊',
+        joy: '😀',
         disgust: '🤢',
-        fear: '😱',
+        fear: '😨',
         neutral: '😐',
         surprise: '😲'
     };
@@ -115,10 +124,16 @@ function Results() {
                     <h4>Emotion Counts:</h4>
                     <ul className="list-group mb-4">
                         {Object.entries(emotionCounts).map(([emotion, count]) => (
-                            <li key={emotion} className="list-group-item">
+                            <li
+                                key={emotion}
+                                className="list-group-item"
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => handleEmotionClick(emotion)}
+                            >
                                 <strong>{emotion} {emotionEmojis[emotion] || ''}:</strong> {count}
                             </li>
                         ))}
+
                     </ul>
                 </div>
             )}
@@ -156,6 +171,23 @@ function Results() {
 
             </div>
             
+
+        {selectedEmotion && (
+        <div className="modal-overlay">
+            <div className="modal-content">
+            <button className="close-button" onClick={() => setSelectedEmotion(null)}>✖</button>
+            <h4>Posts with {emotionEmojis[selectedEmotion]} {selectedEmotion}</h4>
+            <ul className="list-group">
+                {selectedEmotionPosts.map((post, index) => (
+                <li key={index} className="list-group-item">
+                    {post.text}
+                </li>
+                ))}
+            </ul>
+            </div>
+        </div>
+        )}
+
         </div>
     );
 }

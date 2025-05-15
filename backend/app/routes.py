@@ -7,7 +7,9 @@ import os
 from pathlib import Path
 from app.sentiment import analyze_sentiment
 from pydantic import BaseModel
-
+from fastapi.concurrency import run_in_threadpool
+from fastapi import Query, Request  # Add Request
+from datetime import datetime
 
 #loads env file
 env_path = Path(__file__).resolve().parent.parent / ".env"
@@ -25,13 +27,13 @@ reddit = praw.Reddit(
 
 router = APIRouter()
 
-def reddit_search_logic(q: str, subreddit: str = None, sort: str = "relevance"):
+def reddit_search_logic(q: str, subreddit: str = None, sort: str = "relevance", limit: int = 10):
     sub = reddit.subreddit(subreddit) if subreddit else reddit.subreddit("all")
 
     if sort not in ["relevance", "new", "top", "hot", "comments"]:
         sort = "relevance"
 
-    submissions = sub.search(q, limit=15, sort=sort)
+    submissions = sub.search(q, limit=limit, sort=sort)
 
     results = []
     for submission in submissions:
@@ -65,37 +67,99 @@ async def search_reddit(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
+from fastapi import Query
 @router.get("/analyze-reddit")
 async def analyze_reddit(
+    request: Request,  # <<<<<< ADDED
     q: str,
     subreddit: str = Query(None),
-    sort: str = Query("relevance")
+    sort: str = Query("relevance"),
+    limit: int = Query(10, ge=10, le=700)
 ):
     try:
-        print(f"searching term: '{q}' in subreddit: '{subreddit}'")
+        print(f"searching term: '{q}' in subreddit: '{subreddit}' with limit {limit}")
 
-        reddit_data = reddit_search_logic(q, subreddit=subreddit, sort=sort)
+        # 1. Create unique cache key
+        key = f"{q.lower()}_{subreddit}_{sort}_{limit}"
+
+        # 2. Check MongoDB for cached result
+        cached = await request.app.db.sentiment_results.find_one({"_id": key})
+        if cached:
+            print("✅ Returning cached result from DB")
+            return cached["data"]
+
+        # 3. Perform search and sentiment analysis
+        reddit_data = reddit_search_logic(q, subreddit=subreddit, sort=sort, limit=limit)
         texts = [post["content"] for post in reddit_data["results"]]
 
         if not texts:
-            return {
+            empty_response = {
                 "results": [],
                 "rate_limit_info": reddit_data["rate_limit_info"],
                 "sentiment_results": {"results": [], "max_emotion_counts": {}}
             }
+            return empty_response
 
-        sentiment = analyze_sentiment(texts)
+        sentiment = await run_in_threadpool(analyze_sentiment, texts)
 
-        return {
-            "results": reddit_data["results"],
+        enriched_results = []
+        for original_post, emotion_data in zip(reddit_data["results"], sentiment["results"]):
+            enriched_results.append({
+                **original_post,
+                "max_emotion": emotion_data["max_emotion"],
+                "text": emotion_data["text"]
+            })
+
+        final_response = {
+            "results": enriched_results,
             "rate_limit_info": reddit_data["rate_limit_info"],
-            "sentiment_results": sentiment
+            "sentiment_results": {
+                "max_emotion_counts": sentiment["max_emotion_counts"]
+            }
         }
+
+        # 4. Store result in cache
+        await request.app.db.sentiment_results.insert_one({
+            "_id": key,
+            "data": final_response,
+            "created_at": datetime.utcnow()
+        })
+
+        return final_response
 
     except Exception as e:
         print(f"ERROR in /analyze-reddit: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.get("/cached-results")
+async def get_all_cached_results(request: Request):
+    try:
+        cursor = request.app.db.sentiment_results.find().sort("created_at", -1)
+        results = []
+        async for doc in cursor:
+            if not doc.get("data") or not isinstance(doc["data"], dict):
+                continue
+
+            result_entry = {
+                "query_key": doc["_id"],
+                "data": {
+                    **doc["data"],
+                    "created_at": doc.get("created_at")
+                }
+            }
+
+            results.append(result_entry)
+
+        print("✅ Cached Results Returned:")
+        for r in results:
+            print(r)  # Log each cached result to terminal
+
+        return results
+
+    except Exception as e:
+        print("❌ Error in /cached-results:", e)
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 #for graph display:
 #it looks useless i know but it is not 
@@ -105,3 +169,4 @@ class EmotionData(BaseModel):
 @router.post("/emotion-graph")
 async def get_emotion_graph(emotion_data: EmotionData):
     return emotion_data.max_emotion_counts
+

@@ -52,6 +52,17 @@ const NavBar = () => {
                             History
                         </NavLink>
                     </li>
+                    <li className="nav-item">
+                        <NavLink 
+                            to="/cached" 
+                            className={({ isActive }) => 
+                                isActive ? "nav-link active" : "nav-link"
+                            }
+                            aria-current="page"
+                        >
+                            Cached Results
+                        </NavLink>
+                    </li>
 
                 </ul>
             </div>
