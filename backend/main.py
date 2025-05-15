@@ -1,8 +1,3 @@
-#tasks:
-#1) handle POST request
-#2) sanitize the input
-#3) store the sanitized keyword in MongoDB (?)
-
 from fastapi import FastAPI
 from app.routes import router
 from fastapi import HTTPException
@@ -16,6 +11,14 @@ from fastapi.middleware.cors import CORSMiddleware  # import CORSMiddleware othe
 from fastapi.responses import JSONResponse
 import os
 from dotenv import load_dotenv
+from pymongo import MongoClient
+import certifi
+"""
+if the database is pouting, put this in the terminal before running app.
+export SSL_CERT_FILE=$(python3 -m certifi)
+uvicorn main:app --reload
+"""
+
 
 # add CORSMiddleware to handle CORS (otherwise get 405 Method Not Allowed error)
 origins = [
@@ -26,6 +29,9 @@ origins = [
 
 load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
+print("MONGO_URI =", MONGO_URI)
+client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
+db = client["keyword_db"]
 
 # lifespan event handler to manage startup/shutdown of the app
 # using asynccontextmanager decorator. Context manager defines async setup and teardown (release resources)
@@ -47,23 +53,13 @@ app.include_router(router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # allow these origins
+    allow_origins=["*"], # allow all origins (CORS)
     allow_credentials=True,
     allow_methods=["*"],  # allow all HTTP methods (GET, POST, etc.)
     allow_headers=["*"],  # allow all headers
 )
 
 # handle OPTIONS request to respond to preflight request
-@app.options("/keywords/")
-async def handle_options():
-    return JSONResponse(
-        status_code=200,
-        headers={
-            "Access-Control-Allow-Origin": "http://localhost:3000",  # Frontend URL
-            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type"
-        }
-    )
 
 @app.get("/")
 async def read_root():
@@ -72,6 +68,7 @@ async def read_root():
 # pydantic model for request body
 class KeywordRequest(BaseModel):
     query: str
+    user_id: str
 
 # helper fu"ction to sanitize the input (remove unwanted chars, e.g., special chars)
 def sanitize_input(input_str: str) -> str:
@@ -80,40 +77,41 @@ def sanitize_input(input_str: str) -> str:
 
 # to further sanitize the input, we should convert it all to lowercase, and make sure we dont add conjugations of the same word to the db!
 
+
+
 # endpoint to handle POST request:
 @app.post("/keywords/")
 async def create_keyword(keyword: KeywordRequest):
+    print("Received keyword:", keyword)
     sanitized_query = sanitize_input(keyword.query)
 
     if not sanitized_query:
         raise HTTPException(status_code=400, detail="Keyword cannot be empty or invalid.")
-    
+
     created_at = datetime.now().isoformat()
+    keyword_id = str(uuid.uuid4())
 
-    keyword_id = str(uuid.uuid4())  # unique identifier for keyword
     keyword_document = {
-        "_id": keyword_id,  # unique ID
-        "query": sanitized_query,  # search term
-        "created_at": created_at,  # search date
+        "_id": keyword_id,
+        "query": sanitized_query,
+        "created_at": created_at,
     }
+    if keyword.user_id:
+        keyword_document["user_id"] = keyword.user_id
 
-    # store sanitized keyword into MongoDB collection (aka table):
     try:
-        result = await app.db.keywords.insert_one(keyword_document)  # insert document into dynamically created collection
-        return {"id": keyword_id, "query": sanitized_query, "message": "Keyword added successfuly with date", "created_at": created_at}
+        result = await app.db.keywords.insert_one(keyword_document)
+        return {
+            "id": keyword_id,
+            "query": sanitized_query,
+            "created_at": created_at,
+            "message": "Keyword stored successfully"
+        }
     except Exception as e:
+        print(f"❌ DATABASE ERROR: {e}")
         raise HTTPException(status_code=500, detail="Failed to store keyword in database.")
 # Endpoint to fetch all keywords
 @app.get("/keywords/")
 async def get_keywords():
     keywords = await app.db.keywords.find().to_list(length=100)
     return keywords
-
-#tasks:
-#text pre-processing:
-#1)remove special characters - done
-#2)convert to lowercase - done
-#3)remove stop words (e.g., 'the', 'and', 'is', etc.) - need
-#4)stemming (e.g., convert 'running' to 'run') (might not be needed)
-#5)lemmatization (e.g., convert 'better' to 'good') (might not be needed)
-#6)tokenization (e.g., split sentence into words) (might not be needed)

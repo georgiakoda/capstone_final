@@ -34,12 +34,13 @@ const About = () => (
     </ul>
 
     <h4 className="mt-4">🤝 Team Members</h4>
-    <ul className="list-group list-group-horizontal-md">
-      <li className="list-group-item flex-fill text-center">Mohib</li>
-      <li className="list-group-item flex-fill text-center">Georgia</li>
-      <li className="list-group-item flex-fill text-center">Eva</li>
-      <li className="list-group-item flex-fill text-center">Tam</li>
+    <ul className="team-list d-flex justify-content-center gap-3 mt-3">
+      <li className="team-member">Mohib</li>
+      <li className="team-member">Georgia</li>
+      <li className="team-member">Eva</li>
+      <li className="team-member">Tam</li>
     </ul>
+
   </div>
 );
 

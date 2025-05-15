@@ -17,12 +17,14 @@ function SearchBar() {
     if (query.trim()) { //remove leading and trailing whitespaces
       //send keyword to FastAPI backend for sanitization and storage into DB
       try {
+        const userId = "test-user-id";
+
         const response = await fetch("http://localhost:8000/keywords/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ query }),
+          body: JSON.stringify({ query, user_id:userId }),
         });
 
         await response.json();
@@ -68,44 +70,47 @@ function SearchBar() {
   return (
     <div> 
       <form onSubmit={handleSubmit}>
-        
+
         <input
           type="text"
           placeholder="Enter keyword"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="form-control mb-3"
+          className="form-control mb-3 keyword-input"
         />
-        <div className="d-flex gap-2 mb-3"> 
 
-          <div className="input-group">
+        <div className="d-flex gap-2 mb-3 align-items-center" style={{ justifyContent: 'flex-start' }}>
+
+          <div className="input-group subreddit-input-group">
             <span className="input-group-text" id="inputGroup-sizing-default">r/</span>
             <input
               type="text"
               placeholder="Subreddit name (optional)"
               value={subreddit}
               onChange={(e) => setSubreddit(e.target.value)}
-              className="form-control flex-grow-1"  
+              className="form-control subreddit-input"
             />
           </div>
 
-          
-        
-        <select 
-          value={sort} 
-          onChange={(e) => setSort(e.target.value)}
-          className="form-select w-auto"  
-        >
-          <option value="">Sort by: </option>
-          <option value="relevance">relevance</option>
-          <option value="new">new</option>
-          <option value="top">top</option>
-          <option value="hot">hot</option>
-          <option value="comments">comments</option>
-        </select>
-        <button type="submit" className="btn btn-primary btn-md w-auto">Search</button>
-      </div>
+          <select 
+            value={sort} 
+            onChange={(e) => setSort(e.target.value)}
+            className="form-select w-auto"  
+          >
+            <option value="">Sort by: </option>
+            <option value="relevance">relevance</option>
+            <option value="new">new</option>
+            <option value="top">top</option>
+            <option value="hot">hot</option>
+            <option value="comments">comments</option>
+          </select>
+
+          <button type="submit" className="btn btn-primary btn-md w-auto custom-btn">Search</button>
+
+        </div>
+
       </form>
+
     </div>
   );
 }

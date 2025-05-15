@@ -12,17 +12,140 @@
     animation: App-logo-spin infinite 20s linear;
   }
 }
-
+.extra-top-margin {
+  margin-top: 6rem;
+}
 .App-header {
-  background-color: #ffffff;
+  font-family: 'RetroGaming', sans-serif;
+  background-image: url('assets/background.png'); 
+  background-size: cover;       
+  background-position: center;   
+  background-repeat: no-repeat; 
   min-height: 100vh;
+  
+  /* Remove flex centering */
+  display: block;               /* instead of flex */
+  padding-top: 18rem;           /* static spacing from top */
+  padding-left: 2rem;
+  padding-right: 2rem;
+
+  text-align: center;
+}
+
+
+.App-header > div {
+  transform: scaleX(0.65); 
+  transform-origin: top center; /* Keep it anchored at the top center */
+}
+
+.card {
+  transition: transform 0.3s ease; /* smooth transition */
+  cursor: pointer; /* optional, indicates hover */
+}
+
+.card:hover {
+  transform: scale(1.05); /* scale up 5% */
+  z-index: 10; /* keep it above neighbors when hovered */
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2); /* optional, adds subtle shadow */
+}
+
+/* All nav links */
+.nav-link {
+  color: #0caeff !important;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+/* When hovered */
+.nav-link:hover {
+  color: #0caeff !important;  /* Lighter blue on hover */
+}
+
+/* When active */
+.nav-link.active {
+  color: #0482b8 !important;  /* Brighter blue when active */
+}
+
+
+@font-face {
+  font-family: 'RetroGaming';
+  src: url('assets/retro-gaming.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.App {
+  font-family: 'RetroGaming', sans-serif;
+  text-align: center;
+}
+
+.team-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  max-width: 600px; /* optional, to limit width */
+}
+
+.team-member {
+  background-color: #3ebefe; /* bootstrap primary blue or pick your color */
+  color: white;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  font-family: 'RetroGaming', sans-serif; /* if you want your custom font */
+}
+
+.team-member:hover {
+  transform: scale(1.1);
+  box-shadow: 0 8px 15px rgba(87, 159, 241, 0.3);
+}
+
+.custom-btn {
+  background-color: #8cbade !important;
+  border-color: #8cbade !important;
+  color: white !important;
+}
+
+.custom-btn:hover {
+  background-color: #0482b8 !important;
+  border-color: #7ed2fc !important;
+  transform: scale(1.05); /* scale up 5% */
+}
+
+.keyword-input {
+  max-width: 830px;   /* adjust width as needed */
+  margin-left: 195px;
+}
+
+.input-group {
+  max-width: 400px;  /* control width of subreddit input group */
+  margin-left: 356px;    /* reset margin so it aligns */
+}
+
+.subreddit-input {
+  width: 150%;       /* make input fill the input-group */
+}
+
+
+.frosted-card {
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   color: white;
 }
+
+
 
 .App-link {
   color: #61dafb;

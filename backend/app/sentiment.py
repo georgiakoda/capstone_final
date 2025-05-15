@@ -4,6 +4,13 @@ import numpy as np
 from collections import Counter
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer
 
+# Select the correct device (MPS if available)
+device = "mps" if torch.backends.mps.is_available() else "cpu"
+print(f"Using device: {device}")
+
+########new
+device = "mps" if torch.backends.mps.is_available() else "cpu"
+
 
 class SimpleDataset:
     def __init__(self, tokenized_texts):
@@ -18,7 +25,7 @@ class SimpleDataset:
 # loads tokenizer and model, creates trainer
 model_name = "j-hartmann/emotion-english-distilroberta-base"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForSequenceClassification.from_pretrained(model_name)
+model = AutoModelForSequenceClassification.from_pretrained(model_name).to(device)
 trainer = Trainer(model=model)
 
 def analyze_sentiment(texts):
@@ -30,6 +37,11 @@ def analyze_sentiment(texts):
     """
     # tokenizes texts and creates prediction dataset
     tokenized_texts = tokenizer(texts, truncation=True, padding=True, return_tensors="pt")
+
+    # move tensors to the MPS device
+    for key in tokenized_texts:
+        tokenized_texts[key] = tokenized_texts[key].to(device)
+
     pred_dataset = SimpleDataset(tokenized_texts)
 
     predictions = trainer.predict(pred_dataset)

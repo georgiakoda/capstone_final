@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 from app.sentiment import analyze_sentiment
 from pydantic import BaseModel
+from fastapi.concurrency import run_in_threadpool
 
 
 #loads env file
@@ -54,6 +55,7 @@ def reddit_search_logic(q: str, subreddit: str = None, sort: str = "relevance"):
     }
 
 
+
 @router.get("/search/reddit/")
 async def search_reddit(
     q: str,
@@ -84,8 +86,8 @@ async def analyze_reddit(
                 "rate_limit_info": reddit_data["rate_limit_info"],
                 "sentiment_results": {"results": [], "max_emotion_counts": {}}
             }
+        sentiment = await run_in_threadpool(analyze_sentiment, texts) ########new
 
-        sentiment = analyze_sentiment(texts)
 
         return {
             "results": reddit_data["results"],
@@ -97,6 +99,7 @@ async def analyze_reddit(
         print(f"ERROR in /analyze-reddit: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 #for graph display:
 #it looks useless i know but it is not 
 class EmotionData(BaseModel):
@@ -105,3 +108,4 @@ class EmotionData(BaseModel):
 @router.post("/emotion-graph")
 async def get_emotion_graph(emotion_data: EmotionData):
     return emotion_data.max_emotion_counts
+
