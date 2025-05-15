@@ -32,7 +32,7 @@ def reddit_search_logic(q: str, subreddit: str = None, sort: str = "relevance"):
     if sort not in ["relevance", "new", "top", "hot", "comments"]:
         sort = "relevance"
 
-    submissions = sub.search(q, limit=15, sort=sort)
+    submissions = sub.search(q, limit=500, sort=sort)
 
     results = []
     for submission in submissions:
@@ -89,10 +89,21 @@ async def analyze_reddit(
         sentiment = await run_in_threadpool(analyze_sentiment, texts) ########new
 
 
+        # Merge emotion data into each post
+        enriched_results = []
+        for original_post, emotion_data in zip(reddit_data["results"], sentiment["results"]):
+            enriched_results.append({
+                **original_post,
+                "max_emotion": emotion_data["max_emotion"],
+                "text": emotion_data["text"]  # Optional: for debugging or use
+            })
+
         return {
-            "results": reddit_data["results"],
+            "results": enriched_results,
             "rate_limit_info": reddit_data["rate_limit_info"],
-            "sentiment_results": sentiment
+            "sentiment_results": {
+                "max_emotion_counts": sentiment["max_emotion_counts"]
+            }
         }
 
     except Exception as e:
