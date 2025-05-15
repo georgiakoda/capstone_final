@@ -16,6 +16,9 @@ from fastapi.middleware.cors import CORSMiddleware  # import CORSMiddleware othe
 from fastapi.responses import JSONResponse
 import os
 from dotenv import load_dotenv
+from typing import Dict
+from fastapi import Query
+
 
 # add CORSMiddleware to handle CORS (otherwise get 405 Method Not Allowed error)
 origins = [
@@ -39,6 +42,7 @@ async def lifespan(app: FastAPI):
     yield
     # shutdown: close MongoDB client
     app.mongodb_client.close()
+
 
 # use the lifespan context manager to manage app startup and shutdown
 app = FastAPI(lifespan=lifespan)
@@ -72,6 +76,13 @@ async def read_root():
 # pydantic model for request body
 class KeywordRequest(BaseModel):
     query: str
+
+    
+# Define a Pydantic model for Sentiment results    
+class SentimentResult(BaseModel):
+    keyword_id: str  # matches the _id in keywords collection
+    total_analyzed: int
+    sentiment_breakdown: Dict[str, int]  
 
 # helper fu"ction to sanitize the input (remove unwanted chars, e.g., special chars)
 def sanitize_input(input_str: str) -> str:
@@ -108,6 +119,40 @@ async def create_keyword(keyword: KeywordRequest):
 async def get_keywords():
     keywords = await app.db.keywords.find().to_list(length=100)
     return keywords
+
+    
+@app.post("/results/")
+async def store_sentiment_result(data: SentimentResult):
+    sentiment_doc = {
+        "keyword_id": data.keyword_id,
+        "timestamp": datetime.utcnow(),  # record time when it was done
+        "total_analyzed": data.total_analyzed,
+        "sentiment_breakdown": data.sentiment_breakdown
+    }
+
+    try:
+        await app.db.sentiment_results.insert_one(sentiment_doc)
+        return {
+            "message": "Sentiment result stored successfully",
+            "timestamp": sentiment_doc["timestamp"]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error storing sentiment result: {str(e)}")
+
+@app.get("/results/{keyword_id}")
+async def get_sentiment_results(keyword_id: str):
+    try:
+        results = await app.db.sentiment_results.find(
+            {"keyword_id": keyword_id}
+        ).sort("timestamp", 1).to_list(length=100)  # sorted oldest → newest
+
+        if not results:
+            raise HTTPException(status_code=404, detail="No results found for the given keyword ID.")
+        
+        return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving results: {str(e)}")
+
 
 #tasks:
 #text pre-processing:
