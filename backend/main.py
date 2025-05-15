@@ -131,7 +131,7 @@ async def store_sentiment_result(data: SentimentResult):
     }
 
     try:
-        await app.db.search_results.insert_one(sentiment_doc)
+        await app.db.sentiment_results.insert_one(sentiment_doc)
         return {
             "message": "Sentiment result stored successfully",
             "timestamp": sentiment_doc["timestamp"]
@@ -142,7 +142,7 @@ async def store_sentiment_result(data: SentimentResult):
 @app.get("/results/{keyword_id}")
 async def get_sentiment_results(keyword_id: str):
     try:
-        results = await app.db.search_results.find(
+        results = await app.db.sentiment_results.find(
             {"keyword_id": keyword_id}
         ).sort("timestamp", 1).to_list(length=100)  # sorted oldest → newest
 
