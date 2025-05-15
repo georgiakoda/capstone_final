@@ -1,17 +1,14 @@
-//tasks:
-//1)capture user input
-//2)send user input to backend
-//3)handle the response
+import { useNavigate } from "react-router-dom";
 
 import React, { useState } from "react";
 
-function SearchBar({ onSearch }) {
+function SearchBar() {
   const [query, setQuery] = useState("");
   const [sentimentResults, setSentimentResults] = useState(null);
+  const [subreddit, setSubreddit] = useState("");
+  const [sort, setSort] = useState(""); 
+  const navigate = useNavigate();
 
-  //new states for optional sorting and subreddit search
-  const [subreddit, setSubreddit] = useState(""); // New state for subreddit
-  const [sort, setSort] = useState(""); // New state for sorting option
 
 
   //Handle form submission
@@ -47,12 +44,19 @@ function SearchBar({ onSearch }) {
         const result = await combinedResponse.json();
         
         //console.log("Reddit Search Results:", result.results);
-        console.log("Sentiment Results:", result.sentiment_results);
+        //console.log("Sentiment Results:", result.sentiment_results);
         
         setSentimentResults(result.sentiment_results);
 
-
-
+        //allows the "results" page to access the search term, subreddit and analysis results
+        navigate("/results", { 
+          state: { 
+            sentimentResults: result.sentiment_results, 
+            query: query,
+            subreddit: subreddit,
+            results: result.results } 
+          }
+        );
 
       } catch (error) {
         console.error("Error submitting keyword:", error);

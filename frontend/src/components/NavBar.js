@@ -1,4 +1,3 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css'; 
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'; 
@@ -45,6 +44,7 @@ const NavBar = () => {
                         
                     </li>
                     <li className="nav-item">
+<<<<<<< HEAD
   <NavLink 
     to="/history" 
     className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
@@ -53,6 +53,16 @@ const NavBar = () => {
   </NavLink>
 </li>
 
+=======
+                        
+                        <NavLink 
+                            to="/history" 
+                            className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+                        >
+                            History
+                        </NavLink>
+                    </li>
+>>>>>>> origin/main
 
                 </ul>
             </div>
