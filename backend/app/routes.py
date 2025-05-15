@@ -137,12 +137,27 @@ async def get_all_cached_results(request: Request):
         cursor = request.app.db.sentiment_results.find().sort("created_at", -1)
         results = []
         async for doc in cursor:
-            results.append({
+            if not doc.get("data") or not isinstance(doc["data"], dict):
+                continue
+
+            result_entry = {
                 "query_key": doc["_id"],
-                "data": doc["data"]
-            })
+                "data": {
+                    **doc["data"],
+                    "created_at": doc.get("created_at")
+                }
+            }
+
+            results.append(result_entry)
+
+        print("✅ Cached Results Returned:")
+        for r in results:
+            print(r)  # Log each cached result to terminal
+
         return results
+
     except Exception as e:
+        print("❌ Error in /cached-results:", e)
         raise HTTPException(status_code=500, detail=str(e))
 
 

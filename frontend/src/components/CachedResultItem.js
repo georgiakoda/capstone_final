@@ -8,74 +8,87 @@ const emotionEmojis = {
   disgust: '🤢',
   fear: '😨',
   neutral: '😐',
-  surprise: '😲'
+  surprise: '😲',
 };
 
-const getPostTitle = (content) => content.split('\n\n')[0];
-const getPostBody = (content) => content.split('\n\n').slice(1).join('\n\n');
+function getPostTitle(content) {
+  return content.split('\n\n')[0];
+}
+function getPostBody(content) {
+  return content.split('\n\n').slice(1).join('\n\n');
+}
 
 function CachedResultItem({ item }) {
   const graphRef = useRef(null);
-  const [expandedIndex, setExpandedIndex] = useState(null);
-  const data = item.data;
-  const emotionCounts = data.sentiment_results?.max_emotion_counts;
-  const results = data.results || [];
+  const [expandedPostIndex, setExpandedPostIndex] = useState(null);
+  const { query_key, data } = item;
+  const { results, sentiment_results, created_at } = data;
 
+  const formattedDate = new Date(created_at).toLocaleString();
+
+  // Draw graph
   useEffect(() => {
-    if (!emotionCounts || !graphRef.current) return;
+    const counts = sentiment_results?.max_emotion_counts;
+    if (!counts) return;
 
-    const emotions = Object.keys(emotionCounts);
-    const values = Object.values(emotionCounts);
-    const colors = emotions.map((emotion) =>
-      ({
-        anger: '#e02525',
-        sadness: '#55a0f1',
-        joy: '#6ee558',
-        disgust: '#9b9b9b',
-        fear: '#fca14b',
-        neutral: '#fce357',
-        surprise: '#bf84f7'
-      }[emotion] || 'blue')
-    );
+    const emotionColors = {
+      anger: '#e02525',
+      sadness: '#55a0f1',
+      joy: '#6ee558',
+      disgust: '#9b9b9b',
+      fear: '#fca14b',
+      neutral: '#fce357',
+      surprise: '#bf84f7'
+    };
 
-    const graphData = [{
+    const emotions = Object.keys(counts);
+    const colors = emotions.map(e => emotionColors[e] || 'gray');
+
+    const data = [{
       x: emotions,
-      y: values,
+      y: Object.values(counts),
       type: 'bar',
-      marker: { color: colors },
-      text: values,
-      textposition: 'auto'
+      text: Object.values(counts),
+      textposition: 'auto',
+      marker: { color: colors }
     }];
 
-    Plotly.newPlot(graphRef.current, graphData, {
-      title: `Emotion Counts for: ${item.query_key}`,
+    const layout = {
+      title: 'Emotion Counts',
       xaxis: { title: 'Emotion' },
       yaxis: { title: 'Count' }
-    });
-  }, [emotionCounts, item.query_key]);
+    };
+
+    Plotly.newPlot(graphRef.current, data, layout);
+  }, [sentiment_results]);
 
   return (
-    <div className="my-5">
-      <div ref={graphRef} />
-      <ul className="list-group mt-4">
+    <div className="card mb-4 p-3 shadow">
+      <h4 className="mb-2">🔎 <strong>{query_key}</strong></h4>
+      <p className="text-muted mb-3">🕒 {formattedDate}</p>
+
+      <div ref={graphRef} className="mb-4" />
+
+      <h5>Posts Found:</h5>
+      <ul className="list-group">
         {results.map((post, index) => {
           const title = getPostTitle(post.content);
           const body = getPostBody(post.content);
-          const isExpanded = expandedIndex === index;
+          const isExpanded = expandedPostIndex === index;
 
           return (
             <li
               key={index}
               className="list-group-item"
               style={{ cursor: 'pointer' }}
-              onClick={() => setExpandedIndex(isExpanded ? null : index)}
+              onClick={() => setExpandedPostIndex(isExpanded ? null : index)}
             >
-              <strong>{title}</strong>
-              <br />
-              <small>
-                Subreddit: <code>r/{post.subreddit}</code> | Emotion: {post.max_emotion} {emotionEmojis[post.max_emotion]}
-              </small>
-              {isExpanded && <p className="mt-2">{body}</p>}
+              <strong>{emotionEmojis[post.max_emotion]} [{post.max_emotion}]</strong>: <strong>{title}</strong>
+              {isExpanded && (
+                <div className="mt-2">
+                  <p>{body}</p>
+                </div>
+              )}
             </li>
           );
         })}
