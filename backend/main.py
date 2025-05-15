@@ -11,21 +11,20 @@ from fastapi.middleware.cors import CORSMiddleware  # import CORSMiddleware othe
 from fastapi.responses import JSONResponse
 import os
 from dotenv import load_dotenv
-
 from pymongo import MongoClient
 import certifi
+
 """
 if the database is pouting, put this in the terminal before running app.
 export SSL_CERT_FILE=$(python3 -m certifi)
 uvicorn main:app --reload
 """
 
-
 # add CORSMiddleware to handle CORS (otherwise get 405 Method Not Allowed error)
 origins = [
-    "http://localhost",  # allow frontend (localhost)
+    "http://localhost",  
     "http://localhost:3000",
-    "http://localhost:8000"  # for example if using react's default port
+    "http://localhost:8000"
 ]
 
 load_dotenv()
@@ -72,21 +71,11 @@ class KeywordRequest(BaseModel):
     query: str
     user_id: str
 
-    
-# Define a Pydantic model for Sentiment results    
-class SentimentResult(BaseModel):
-    keyword_id: str  # matches the _id in keywords collection
-    total_analyzed: int
-    sentiment_breakdown: Dict[str, int]  
 
 # helper fu"ction to sanitize the input (remove unwanted chars, e.g., special chars)
 def sanitize_input(input_str: str) -> str:
     sanitized = re.sub(r'[^a-zA-Z0-9 ]', '', input_str)  # remove all chars except alphabets, numbers, and spaces
     return sanitized.strip().lower()  # strip leading/trailing spaces, convert to lowercase
-
-# to further sanitize the input, we should convert it all to lowercase, and make sure we dont add conjugations of the same word to the db!
-
-
 
 # endpoint to handle POST request:
 @app.post("/keywords/")
@@ -119,6 +108,7 @@ async def create_keyword(keyword: KeywordRequest):
     except Exception as e:
         print(f"❌ DATABASE ERROR: {e}")
         raise HTTPException(status_code=500, detail="Failed to store keyword in database.")
+
 # Endpoint to fetch all keywords
 @app.get("/keywords/")
 async def get_keywords():
