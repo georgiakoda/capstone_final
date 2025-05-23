@@ -32,10 +32,13 @@ As for the MONGO_URI value, if you're our professor, Georgia emailed it to you. 
 
 If you want to use your own MongoDB cluster, go to "Connect", click "Drivers", select Python from the drop down menu (this project uses Python 3.9.6) and copy paste the value inside the quotations that follows `uri =` in the code sample. 
 
+If you encounter SSL Handshake errors on connection to database, make sure to run the export command with use of certifi to fix this issue. 
 
 ## 4. Run
+
 Go to the backend folder and run:
    ```bash
+   export SSL_CERT_FILE=$(python3 -m certifi) #if incountering SSL Handshake errors 
    uvicorn main:app --reload
    ```
 If everything is good it should say something like:
